@@ -37,5 +37,10 @@ public class CitiesController {
         return citiesService.updateCity(id, cityDto);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCity(@PathVariable Integer id){
+        return citiesService.deleteCity(id);
+    }
+
 
 }

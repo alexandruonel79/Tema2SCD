@@ -109,9 +109,39 @@ public class CitiesService {
         }
 
         Oras oras = orasOptional.get();
-        ///TODO CONTINUARE
 
+        if (oras.getTara().getId().intValue() != cityDto.getIdTara().intValue()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
+        // if i update the city name with a existing city name in the same country
+        if (!oras.getNumeOras().equals(cityDto.getNume())){
+            Optional<Tara> taraOptional = taraRepository.findById(cityDto.getIdTara());
+            if (taraOptional.isPresent()){
+                List<Oras> orasList = taraOptional.get().getOrase();
+                for (Oras orasTemp: orasList){
+                    if (orasTemp.getNumeOras().equals(cityDto.getNume())){
+                        return new ResponseEntity<>(HttpStatus.CONFLICT);
+                    }
+                }
+            }
+        }
 
+        oras.setNumeOras(cityDto.getNume());
+        oras.setLatitudine(cityDto.getLat());
+        oras.setLongitudine(cityDto.getLon());
+        orasRepository.save(oras);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> deleteCity(Integer id) {
+        // check the city exists
+        if (!orasRepository.existsById(id)){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        orasRepository.deleteById(id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
