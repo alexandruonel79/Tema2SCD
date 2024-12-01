@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,16 +63,22 @@ public class TemperaturesService {
         List<Oras> orasList = orasRepository.findAll();
         List<Temperatura> temperaturaListFilteredLatAndLon = new ArrayList<>();
         for (Oras oras : orasList){
-            if (lat != null && lon != null && oras.getLatitudine().equals(lat) && oras.getLongitudine().equals(lon)){
-                temperaturaListFilteredLatAndLon.addAll(oras.getTemperaturi());
+            if (lat != null && lon != null){
+                if (oras.getLatitudine().equals(lat) && oras.getLongitudine().equals(lon)){
+                    temperaturaListFilteredLatAndLon.addAll(oras.getTemperaturi());
+                }
             }
-            else if (lat != null && oras.getLatitudine().equals(lat)){
-                temperaturaListFilteredLatAndLon.addAll(oras.getTemperaturi());
+            else if (lat != null){
+                if (oras.getLatitudine().equals(lat)){
+                    temperaturaListFilteredLatAndLon.addAll(oras.getTemperaturi());
+                }
             }
-            else if (lon != null && oras.getLongitudine().equals(lon)){
-                temperaturaListFilteredLatAndLon.addAll(oras.getTemperaturi());
+            else if (lon != null){
+                if (oras.getLongitudine().equals(lon)){
+                    temperaturaListFilteredLatAndLon.addAll(oras.getTemperaturi());
+                }
             }
-            else if (lat == null && lon == null){
+            else {
                 temperaturaListFilteredLatAndLon.addAll(oras.getTemperaturi());
             }
         }
@@ -79,19 +86,27 @@ public class TemperaturesService {
         List<Temperatura> filteredList = new ArrayList<>();
 
         for (Temperatura temp : temperaturaListFilteredLatAndLon){
-            if (from != null && until != null && temp.getTimestamp().after(Timestamp.valueOf(from.atStartOfDay())) && temp.getTimestamp().before(Timestamp.valueOf(until.atStartOfDay()))){
-                filteredList.add(temp);
+            LocalDate localDate = temp.getTimestamp().toLocalDateTime().toLocalDate();
+            if (from != null && until != null){
+                    if (localDate.isAfter(from) && localDate.isBefore(until)){
+                        filteredList.add(temp);
+                    }
             }
-            else if (from != null && temp.getTimestamp().after(Timestamp.valueOf(from.atStartOfDay()))){
-                filteredList.add(temp);
+            else if (from != null){
+                if (localDate.isAfter(from)){
+                    filteredList.add(temp);
+                }
             }
-            else if (until != null && temp.getTimestamp().before(Timestamp.valueOf(until.atStartOfDay()))){
-                filteredList.add(temp);
+            else if (until != null){
+                if (localDate.isBefore(until)){
+                    filteredList.add(temp);
+                }
             }
-            else if (from == null && until == null){
+            else {
                 filteredList.add(temp);
             }
         }
+
         List<TemperatureRes> temperatureResList = new ArrayList<>();
         for (Temperatura temp : filteredList){
             TemperatureRes temperatureRes = new TemperatureRes();

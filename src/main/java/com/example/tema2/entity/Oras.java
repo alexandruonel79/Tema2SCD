@@ -33,7 +33,7 @@ public class Oras {
     @JoinColumn(name = "id_tara", referencedColumnName = "id")
     private Tara tara;
 
-    @OneToMany(mappedBy = "oras")
+    @OneToMany(mappedBy = "oras", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Temperatura> temperaturi;
 
 }

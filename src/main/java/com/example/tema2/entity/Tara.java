@@ -30,7 +30,7 @@ public class Tara {
     @Column
     Double longitudine;
 
-    @OneToMany(mappedBy = "tara")
+    @OneToMany(mappedBy = "tara", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Oras> orase;
 }

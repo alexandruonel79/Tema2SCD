@@ -26,10 +26,10 @@ public class TemperaturesController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllTemperatures(@PathVariable(required = false) Double lat,
-                                                @PathVariable(required = false) Double lon,
-                                                @PathVariable(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-                                                @PathVariable(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate until
+    public ResponseEntity<?> getAllTemperatures(@RequestParam(required = false) Double lat,
+                                                @RequestParam(required = false) Double lon,
+                                                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                                                @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate until
                                                 ){
         return temperaturesService.getAllTemperatures(lat, lon, from, until);
     }
