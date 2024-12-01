@@ -15,9 +15,9 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TemperaturesService {
@@ -91,6 +91,51 @@ public class TemperaturesService {
                     if (localDate.isAfter(from) && localDate.isBefore(until)){
                         filteredList.add(temp);
                     }
+            }
+            else if (from != null){
+                if (localDate.isAfter(from)){
+                    filteredList.add(temp);
+                }
+            }
+            else if (until != null){
+                if (localDate.isBefore(until)){
+                    filteredList.add(temp);
+                }
+            }
+            else {
+                filteredList.add(temp);
+            }
+        }
+
+        List<TemperatureRes> temperatureResList = new ArrayList<>();
+        for (Temperatura temp : filteredList){
+            TemperatureRes temperatureRes = new TemperatureRes();
+            temperatureRes.setId(temp.getId());
+            temperatureRes.setValoare(temp.getValoare());
+            temperatureRes.setTimestamp(temp.getTimestamp());
+            temperatureResList.add(temperatureRes);
+        }
+
+        return new ResponseEntity<>(temperatureResList, HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> getAllCitiesTemperatures(LocalDate from, LocalDate until, Integer cityId) {
+        Optional<Oras> oras = orasRepository.findById(cityId);
+        // not sending 404 or another error
+        if (oras.isEmpty()){
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+        }
+
+        List<Temperatura> temperaturaList = orasRepository.findById(cityId).get().getTemperaturi();
+        List<Temperatura> filteredList = new ArrayList<>();
+
+        for (Temperatura temp : temperaturaList){
+            LocalDate localDate = temp.getTimestamp().toLocalDateTime().toLocalDate();
+
+            if (from != null && until != null){
+                if (localDate.isAfter(from) && localDate.isBefore(until)){
+                    filteredList.add(temp);
+                }
             }
             else if (from != null){
                 if (localDate.isAfter(from)){

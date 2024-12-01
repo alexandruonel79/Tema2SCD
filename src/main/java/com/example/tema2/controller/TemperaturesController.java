@@ -33,4 +33,13 @@ public class TemperaturesController {
                                                 ){
         return temperaturesService.getAllTemperatures(lat, lon, from, until);
     }
+
+    @GetMapping("/cities/{cityId}")
+    public ResponseEntity<?> getAllCitiesTemperatures(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                                                      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate until,
+                                                        @PathVariable Integer cityId
+    ){
+        return temperaturesService.getAllCitiesTemperatures(from, until, cityId);
+    }
+
 }
