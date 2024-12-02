@@ -1,6 +1,7 @@
 package com.example.tema2.controller;
 
 import com.example.tema2.dto.CountryDto;
+import com.example.tema2.dto.CountryRes;
 import com.example.tema2.service.CountriesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,7 @@ public class CountriesController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCountry(@PathVariable Integer id, @RequestBody CountryDto countryDto){
+    public ResponseEntity<?> updateCountry(@PathVariable Integer id, @RequestBody CountryRes countryDto){
         return countriesService.updateCountry(id, countryDto);
     }
 

@@ -64,7 +64,11 @@ public class CountriesService {
         return new ResponseEntity<>(countryResList, HttpStatus.OK);
     }
 
-    public ResponseEntity<?> updateCountry(Integer id, CountryDto countryDto) {
+    public ResponseEntity<?> updateCountry(Integer id, CountryRes countryDto) {
+        if (!id.equals(countryDto.getId())){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         Optional<Tara> taraOptional = taraRepository.findById(id);
         if (taraOptional.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

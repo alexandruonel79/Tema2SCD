@@ -2,12 +2,14 @@ package com.example.tema2.service;
 
 import com.example.tema2.dto.IdRes;
 import com.example.tema2.dto.TemperatureDto;
+import com.example.tema2.dto.TemperatureDtoUpdate;
 import com.example.tema2.dto.TemperatureRes;
 import com.example.tema2.entity.Oras;
+import com.example.tema2.entity.Tara;
 import com.example.tema2.entity.Temperatura;
 import com.example.tema2.repository.OrasRepository;
+import com.example.tema2.repository.TaraRepository;
 import com.example.tema2.repository.TemperaturaRepository;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,11 +25,14 @@ import java.util.Optional;
 public class TemperaturesService {
     private final TemperaturaRepository temperaturaRepository;
     private final OrasRepository orasRepository;
+    private final TaraRepository taraRepository;
 
     @Autowired
-    public TemperaturesService(TemperaturaRepository temperaturaRepository, OrasRepository orasRepository) {
+    public TemperaturesService(TemperaturaRepository temperaturaRepository, OrasRepository orasRepository,
+                               TaraRepository taraRepository) {
         this.temperaturaRepository = temperaturaRepository;
         this.orasRepository = orasRepository;
+        this.taraRepository = taraRepository;
     }
 
 
@@ -162,5 +167,85 @@ public class TemperaturesService {
         }
 
         return new ResponseEntity<>(temperatureResList, HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> getAllCountriesTemperatures(LocalDate from, LocalDate until, Integer countryId) {
+        Optional<Tara> taraOptional = taraRepository.findById(countryId);
+
+        if (taraOptional.isEmpty()){
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+        }
+
+        Tara tara = taraOptional.get();
+        List<Temperatura> temperaturaList = new ArrayList<>();
+
+        for (Oras oras : tara.getOrase()){
+            temperaturaList.addAll(oras.getTemperaturi());
+        }
+
+        List<Temperatura> filteredList = new ArrayList<>();
+
+        for (Temperatura temp : temperaturaList){
+            LocalDate localDate = temp.getTimestamp().toLocalDateTime().toLocalDate();
+
+            if (from != null && until != null){
+                if (localDate.isAfter(from) && localDate.isBefore(until)){
+                    filteredList.add(temp);
+                }
+            }
+            else if (from != null){
+                if (localDate.isAfter(from)){
+                    filteredList.add(temp);
+                }
+            }
+            else if (until != null){
+                if (localDate.isBefore(until)){
+                    filteredList.add(temp);
+                }
+            }
+            else {
+                filteredList.add(temp);
+            }
+        }
+        List<TemperatureRes> temperatureResList = new ArrayList<>();
+        for (Temperatura temp : filteredList){
+            TemperatureRes temperatureRes = new TemperatureRes();
+            temperatureRes.setId(temp.getId());
+            temperatureRes.setValoare(temp.getValoare());
+            temperatureRes.setTimestamp(temp.getTimestamp());
+            temperatureResList.add(temperatureRes);
+        }
+
+        return new ResponseEntity<>(temperatureResList, HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> updateTemperature(Integer id, TemperatureDtoUpdate temperatureDtoUpdate) {
+        if (!id.equals(temperatureDtoUpdate.getId())){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        Optional<Temperatura> temperaturaOptional = temperaturaRepository.findById(id);
+        Optional<Oras> orasOptional = orasRepository.findById(temperatureDtoUpdate.getId_oras());
+
+        if (temperaturaOptional.isEmpty() || orasOptional.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        List<Temperatura> temperaturaList = temperaturaRepository.findAll();
+        // check if a temperature with the same ciy_id and timestamp exist
+        for (Temperatura temperatura: temperaturaList){
+            if (temperatura.getOras().getId().equals(temperatureDtoUpdate.getId_oras())  &&
+                temperatura.getTimestamp().equals(new Timestamp(System.currentTimeMillis()))
+            ){
+                return new ResponseEntity<>(HttpStatus.CONFLICT);
+            }
+        }
+
+        // update the temperature
+        Temperatura temperatura = temperaturaOptional.get();
+        temperatura.setOras(orasOptional.get());
+        temperatura.setValoare(temperatureDtoUpdate.getValoare());
+        temperaturaRepository.save(temperatura);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
