@@ -101,7 +101,12 @@ public class CitiesService {
         return new ResponseEntity<>(cityResList, HttpStatus.OK);
     }
 
-    public ResponseEntity<?> updateCity(Integer id, CityDto cityDto) {
+    public ResponseEntity<?> updateCity(Integer id, CityRes cityDto) {
+
+        if (!cityDto.getId().equals(id)){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         Optional<Oras> orasOptional = orasRepository.findById(id);
 
         if (orasOptional.isEmpty()){

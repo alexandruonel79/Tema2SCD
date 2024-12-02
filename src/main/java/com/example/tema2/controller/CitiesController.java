@@ -1,6 +1,7 @@
 package com.example.tema2.controller;
 
 import com.example.tema2.dto.CityDto;
+import com.example.tema2.dto.CityRes;
 import com.example.tema2.dto.CountryDto;
 import com.example.tema2.service.CitiesService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ public class CitiesController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCity(@PathVariable Integer id, @RequestBody CityDto cityDto){
+    public ResponseEntity<?> updateCity(@PathVariable Integer id, @RequestBody CityRes cityDto){
         return citiesService.updateCity(id, cityDto);
     }
 

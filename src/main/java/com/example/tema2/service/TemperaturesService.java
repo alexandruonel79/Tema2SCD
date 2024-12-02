@@ -248,4 +248,15 @@ public class TemperaturesService {
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    public ResponseEntity<?> deleteTemperature(Integer id) {
+        Optional<Temperatura> temperaturaOptional = temperaturaRepository.findById(id);
+
+        if (temperaturaOptional.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        temperaturaRepository.deleteById(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

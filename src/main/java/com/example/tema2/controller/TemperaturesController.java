@@ -58,4 +58,9 @@ public class TemperaturesController {
         return temperaturesService.updateTemperature(id, temperatureDto);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteTemperature(@PathVariable Integer id){
+        return temperaturesService.deleteTemperature(id);
+    }
+
 }
