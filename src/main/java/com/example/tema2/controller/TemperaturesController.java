@@ -4,6 +4,7 @@ import com.example.tema2.dto.TemperatureDto;
 import com.example.tema2.dto.TemperatureDtoUpdate;
 import com.example.tema2.entity.Temperatura;
 import com.example.tema2.service.TemperaturesService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -45,12 +46,24 @@ public class TemperaturesController {
         return temperaturesService.getAllCitiesTemperatures(from, until, cityId);
     }
 
+    @GetMapping("/cities/")
+    public ResponseEntity<?> getAllCitiesTemperaturesWithoutId(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                                                      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate until){
+        return temperaturesService.getAllCitiesTemperatures(from, until, null);
+    }
+
     @GetMapping("/countries/{countryId}")
     public ResponseEntity<?> getAllCountriesTemperatures(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
                                                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate until,
                                                          @PathVariable Integer countryId
     ){
         return temperaturesService.getAllCountriesTemperatures(from, until, countryId);
+    }
+
+    @GetMapping("/countries/")
+    public ResponseEntity<?> getAllCountriesTemperaturesWithoutId(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                                                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate until){
+        return temperaturesService.getAllCountriesTemperatures(from, until, null);
     }
 
     @PutMapping("/{id}")

@@ -25,6 +25,11 @@ public class CountriesService {
     }
 
     public ResponseEntity<?> addCountry(CountryDto countryDto){
+        // check if anything is null
+        if (countryDto.getNume() == null || countryDto.getLat() == null || countryDto.getLon() == null){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         if (taraRepository.existsByNumeTara(countryDto.getNume())){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
@@ -65,6 +70,12 @@ public class CountriesService {
     }
 
     public ResponseEntity<?> updateCountry(Integer id, CountryRes countryDto) {
+        // check if anything is null
+        if (id == null || countryDto.getNume() == null || countryDto.getLat() == null ||
+                countryDto.getLon() == null || countryDto.getId() == null){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         if (!id.equals(countryDto.getId())){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -72,6 +83,10 @@ public class CountriesService {
         Optional<Tara> taraOptional = taraRepository.findById(id);
         if (taraOptional.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        // check if the country with the given name exists
+        if (taraRepository.existsByNumeTara(countryDto.getNume())){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
 
         Tara tara = taraOptional.get();
@@ -84,6 +99,10 @@ public class CountriesService {
     }
 
     public ResponseEntity<?> deleteCountry(Integer id) {
+        //check if id is null
+        if(id == null){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         // check if it exists
         if(!taraRepository.existsById(id)){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

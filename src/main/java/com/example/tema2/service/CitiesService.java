@@ -29,6 +29,10 @@ public class CitiesService {
 
 
     public ResponseEntity<?> addCity(CityDto cityDto) {
+        if (cityDto.getIdTara() == null || cityDto.getNume() == null || cityDto.getLat() == null ||
+                cityDto.getLon() == null){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         // check if the country with the given id exists
         if (!taraRepository.existsById(cityDto.getIdTara())){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -79,6 +83,9 @@ public class CitiesService {
     }
 
     public ResponseEntity<?> getCitiesByCountry(Integer countryId) {
+        if (countryId == null){
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+        }
         Optional<Tara> taraOptional = taraRepository.findById(countryId);
 
         if (taraOptional.isEmpty()){
@@ -102,6 +109,11 @@ public class CitiesService {
     }
 
     public ResponseEntity<?> updateCity(Integer id, CityRes cityDto) {
+        // check if anything is null
+        if (id == null || cityDto.getId() == null || cityDto.getNume() == null || cityDto.getLat() == null ||
+                cityDto.getLon() == null || cityDto.getIdTara() == null){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
         if (!cityDto.getId().equals(id)){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -141,6 +153,10 @@ public class CitiesService {
     }
 
     public ResponseEntity<?> deleteCity(Integer id) {
+        // check if id is null
+        if (id == null){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         // check the city exists
         if (!orasRepository.existsById(id)){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

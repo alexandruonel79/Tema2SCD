@@ -3,6 +3,7 @@ package com.example.tema2.controller;
 import com.example.tema2.dto.CountryDto;
 import com.example.tema2.dto.CountryRes;
 import com.example.tema2.service.CountriesService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

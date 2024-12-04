@@ -4,6 +4,7 @@ import com.example.tema2.dto.CityDto;
 import com.example.tema2.dto.CityRes;
 import com.example.tema2.dto.CountryDto;
 import com.example.tema2.service.CitiesService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ public class CitiesController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addCity(@RequestBody CityDto cityDto){
+    public ResponseEntity<?> addCity(@Valid @RequestBody CityDto cityDto){
         return citiesService.addCity(cityDto);
     }
 
@@ -33,8 +34,13 @@ public class CitiesController {
         return citiesService.getCitiesByCountry(countryId);
     }
 
+    @GetMapping("/country/")
+    public ResponseEntity<?> getCitiesByCountryWithoutId(){
+        return citiesService.getCitiesByCountry(null);
+    }
+
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCity(@PathVariable Integer id, @RequestBody CityRes cityDto){
+    public ResponseEntity<?> updateCity(@PathVariable Integer id,@RequestBody CityRes cityDto){
         return citiesService.updateCity(id, cityDto);
     }
 

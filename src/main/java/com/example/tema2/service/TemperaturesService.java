@@ -37,6 +37,9 @@ public class TemperaturesService {
 
 
     public ResponseEntity<?> addTemperature(TemperatureDto temperatureDto) {
+        if (temperatureDto.getId_oras() == null || temperatureDto.getValoare() == null){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         // check if the city with give id exists
         if (!orasRepository.existsById(temperatureDto.getId_oras())){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -125,6 +128,10 @@ public class TemperaturesService {
     }
 
     public ResponseEntity<?> getAllCitiesTemperatures(LocalDate from, LocalDate until, Integer cityId) {
+        if (cityId == null){
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+        }
+
         Optional<Oras> oras = orasRepository.findById(cityId);
         // not sending 404 or another error
         if (oras.isEmpty()){
@@ -170,6 +177,10 @@ public class TemperaturesService {
     }
 
     public ResponseEntity<?> getAllCountriesTemperatures(LocalDate from, LocalDate until, Integer countryId) {
+        if (countryId == null){
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
+        }
+
         Optional<Tara> taraOptional = taraRepository.findById(countryId);
 
         if (taraOptional.isEmpty()){
@@ -220,6 +231,9 @@ public class TemperaturesService {
     }
 
     public ResponseEntity<?> updateTemperature(Integer id, TemperatureDtoUpdate temperatureDtoUpdate) {
+        if (temperatureDtoUpdate.getId_oras() == null || temperatureDtoUpdate.getValoare() == null){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         if (!id.equals(temperatureDtoUpdate.getId())){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -250,6 +264,10 @@ public class TemperaturesService {
     }
 
     public ResponseEntity<?> deleteTemperature(Integer id) {
+        // check if the id is null
+        if (id == null){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         Optional<Temperatura> temperaturaOptional = temperaturaRepository.findById(id);
 
         if (temperaturaOptional.isEmpty()){
