@@ -1,21 +1,37 @@
 #https://www.youtube.com/watch?v=6GoEfLsTI1E&ab_channel=Geekific util
 #adaugarea de restat:always?
 services:
-  app:
+  spring:
+    container_name: spring
+    networks:
+      - spring_network
+      - common_network
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "6000:8080"
     depends_on:
       - db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/tema2
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
+    restart: always
+    ports:
+      - "6000:6000"
   db:
     image: postgres:latest
     environment:
-      - POSTGRES_DB=postgres
+      - POSTGRES_DB=tema2
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+    networks:
+        - db_network
+        - common_network
+
+networks:
+    spring_network:
+        driver: bridge
+    db_network:
+        driver: bridge
+    common_network:
+        driver: bridge
