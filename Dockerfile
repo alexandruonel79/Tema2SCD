@@ -1,4 +1,12 @@
-FROM openjdk:17-jdk-alpine
-MAINTAINER alexandruOnel79
-COPY target/tema2-0.0.1-SNAPSHOT.jar tema2-0.0.1-SNAPSHOT.jar
-ENTRYPOINT ["java","-jar","/tema2-0.0.1-SNAPSHOT.jar"]
+#https://www.docker.com/blog/kickstart-your-spring-boot-application-development/
+FROM eclipse-temurin:17-jdk-focal
+
+WORKDIR /app
+
+COPY .mvn/ .mvn
+COPY mvnw pom.xml ./
+RUN ./mvnw dependency:go-offline
+
+COPY src ./src
+
+CMD ["./mvnw", "spring-boot:run"]

@@ -1,5 +1,5 @@
 #https://www.youtube.com/watch?v=6GoEfLsTI1E&ab_channel=Geekific util
-#adaugarea de restat:always?
+#adaugarea de restart:always?
 services:
   spring:
     container_name: spring
@@ -27,11 +27,33 @@ services:
     networks:
         - db_network
         - common_network
+    volumes:
+        - db_data:/var/lib/postgresql/data
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=onel@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=onel
+    networks:
+      - pgadmin_network
+      - common_network
+    ports:
+        - "8081:80"
+#https://forums.docker.com/t/automatically-connect-pgadmin-to-a-postgresql-volume-on-which-there-is-a-database-and-automatically-load-a-schema-present-on-a-sql-file-with-docker-compose/124647/2
+    volumes:
+      - ./servers.json:/pgadmin4/servers.json
 
 networks:
     spring_network:
         driver: bridge
     db_network:
         driver: bridge
+    pgadmin_network:
+        driver: bridge
     common_network:
         driver: bridge
+
+volumes:
+  db_data:
