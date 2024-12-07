@@ -11,6 +11,7 @@ import com.example.tema2.repository.OrasRepository;
 import com.example.tema2.repository.TaraRepository;
 import com.example.tema2.repository.TemperaturaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -37,30 +38,27 @@ public class TemperaturesService {
 
 
     public ResponseEntity<?> addTemperature(TemperatureDto temperatureDto) {
+        // check if anything is null
         if (temperatureDto.getId_oras() == null || temperatureDto.getValoare() == null){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        // check if the city with give id exists
+        // not found error
         if (!orasRepository.existsById(temperatureDto.getId_oras())){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         // get the city with the given id
         Oras oras = orasRepository.findById(temperatureDto.getId_oras()).get();
 
-        // check if the temperature already exists, in the same city, with the same timestamp
-        for (Temperatura temp : oras.getTemperaturi()){
-            if (temp.getValoare().equals(temperatureDto.getValoare()) &&
-            temp.getTimestamp().equals(new Timestamp(System.currentTimeMillis()))){
-                return new ResponseEntity<>(HttpStatus.CONFLICT);
-            }
-        }
-
-        // create a new entity from the dto
         Temperatura temperatura = new Temperatura();
         temperatura.setValoare(temperatureDto.getValoare());
         temperatura.setOras(oras);
-        // save the temperature in the db
-        temperatura = temperaturaRepository.save(temperatura);
+
+        try{
+            temperatura = temperaturaRepository.save(temperatura);
+        }
+        catch (DataIntegrityViolationException e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
         IdRes idRes = new IdRes();
         idRes.setId(temperatura.getId());
 
@@ -70,6 +68,8 @@ public class TemperaturesService {
     public ResponseEntity<?> getAllTemperatures(Double lat, Double lon, LocalDate from, LocalDate until) {
         List<Oras> orasList = orasRepository.findAll();
         List<Temperatura> temperaturaListFilteredLatAndLon = new ArrayList<>();
+        // filter just the latitude and longitude
+        // add them in the list if they match
         for (Oras oras : orasList){
             if (lat != null && lon != null){
                 if (oras.getLatitudine().equals(lat) && oras.getLongitudine().equals(lon)){
@@ -92,7 +92,8 @@ public class TemperaturesService {
         }
 
         List<Temperatura> filteredList = new ArrayList<>();
-
+        // now filter the list on from and until
+        // finally, add them to the filtered list
         for (Temperatura temp : temperaturaListFilteredLatAndLon){
             LocalDate localDate = temp.getTimestamp().toLocalDateTime().toLocalDate();
             if (from != null && until != null){
@@ -114,7 +115,7 @@ public class TemperaturesService {
                 filteredList.add(temp);
             }
         }
-
+        // format the response
         List<TemperatureRes> temperatureResList = new ArrayList<>();
         for (Temperatura temp : filteredList){
             TemperatureRes temperatureRes = new TemperatureRes();
@@ -128,6 +129,7 @@ public class TemperaturesService {
     }
 
     public ResponseEntity<?> getAllCitiesTemperatures(LocalDate from, LocalDate until, Integer cityId) {
+        // not specified, send an empty list
         if (cityId == null){
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
         }
@@ -140,7 +142,7 @@ public class TemperaturesService {
 
         List<Temperatura> temperaturaList = orasRepository.findById(cityId).get().getTemperaturi();
         List<Temperatura> filteredList = new ArrayList<>();
-
+        // same idea as above
         for (Temperatura temp : temperaturaList){
             LocalDate localDate = temp.getTimestamp().toLocalDateTime().toLocalDate();
 
@@ -163,7 +165,7 @@ public class TemperaturesService {
                 filteredList.add(temp);
             }
         }
-
+        // format the response
         List<TemperatureRes> temperatureResList = new ArrayList<>();
         for (Temperatura temp : filteredList){
             TemperatureRes temperatureRes = new TemperatureRes();
@@ -177,25 +179,27 @@ public class TemperaturesService {
     }
 
     public ResponseEntity<?> getAllCountriesTemperatures(LocalDate from, LocalDate until, Integer countryId) {
+        // not specified, send an empty list
         if (countryId == null){
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
         }
 
         Optional<Tara> taraOptional = taraRepository.findById(countryId);
-
+        // not sending 404 or another error
+        // should be 404
         if (taraOptional.isEmpty()){
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
         }
 
         Tara tara = taraOptional.get();
         List<Temperatura> temperaturaList = new ArrayList<>();
-
+        // add each city's temperatures to the list
         for (Oras oras : tara.getOrase()){
             temperaturaList.addAll(oras.getTemperaturi());
         }
 
         List<Temperatura> filteredList = new ArrayList<>();
-
+        // filter them using the same idea as above
         for (Temperatura temp : temperaturaList){
             LocalDate localDate = temp.getTimestamp().toLocalDateTime().toLocalDate();
 
@@ -218,6 +222,7 @@ public class TemperaturesService {
                 filteredList.add(temp);
             }
         }
+        // format the response
         List<TemperatureRes> temperatureResList = new ArrayList<>();
         for (Temperatura temp : filteredList){
             TemperatureRes temperatureRes = new TemperatureRes();
@@ -231,40 +236,36 @@ public class TemperaturesService {
     }
 
     public ResponseEntity<?> updateTemperature(Integer id, TemperatureDtoUpdate temperatureDtoUpdate) {
+        // check if anything is null
         if (temperatureDtoUpdate.getId_oras() == null || temperatureDtoUpdate.getValoare() == null){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+        // double check the ids
         if (!id.equals(temperatureDtoUpdate.getId())){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         Optional<Temperatura> temperaturaOptional = temperaturaRepository.findById(id);
         Optional<Oras> orasOptional = orasRepository.findById(temperatureDtoUpdate.getId_oras());
-
+        // if the temperature or the city mentioned does not exist, return 404
         if (temperaturaOptional.isEmpty() || orasOptional.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        List<Temperatura> temperaturaList = temperaturaRepository.findAll();
-        // check if a temperature with the same ciy_id and timestamp exist
-        for (Temperatura temperatura: temperaturaList){
-            if (temperatura.getOras().getId().equals(temperatureDtoUpdate.getId_oras())  &&
-                temperatura.getTimestamp().equals(new Timestamp(System.currentTimeMillis()))
-            ){
-                return new ResponseEntity<>(HttpStatus.CONFLICT);
-            }
         }
 
         // update the temperature
         Temperatura temperatura = temperaturaOptional.get();
         temperatura.setOras(orasOptional.get());
         temperatura.setValoare(temperatureDtoUpdate.getValoare());
-        temperaturaRepository.save(temperatura);
+        try{
+            temperaturaRepository.save(temperatura);
+        }
+        catch (DataIntegrityViolationException e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public ResponseEntity<?> deleteTemperature(Integer id) {
-        // check if the id is null
         if (id == null){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

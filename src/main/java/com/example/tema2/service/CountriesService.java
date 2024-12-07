@@ -6,6 +6,7 @@ import com.example.tema2.dto.IdRes;
 import com.example.tema2.entity.Tara;
 import com.example.tema2.repository.TaraRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -29,27 +30,29 @@ public class CountriesService {
         if (countryDto.getNume() == null || countryDto.getLat() == null || countryDto.getLon() == null){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+        // check if the latitude and longitude are valid
+        if (countryDto.getLat() < -90 || countryDto.getLat() > 90 || countryDto.getLon() < -180 || countryDto.getLon() > 180){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
         if (taraRepository.existsByNumeTara(countryDto.getNume())){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
 
-//        if (taraRepository.existsByLongitudineAndLatitudine(countryDto.getLon(), countryDto.getLat())){
-//            return new ResponseEntity<>(HttpStatus.CONFLICT);
-//        }
-
-        // create a new entity from the dto
         Tara tara = new Tara();
         tara.setNumeTara(countryDto.getNume());
         tara.setLatitudine(countryDto.getLat());
         tara.setLongitudine(countryDto.getLon());
 
-        // save the country in the db
-        tara = taraRepository.save(tara);
-
+        try {
+            tara = taraRepository.save(tara);
+        }
+        catch (DataIntegrityViolationException e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+        // send the id
         IdRes countryRes = new IdRes();
         countryRes.setId(tara.getId());
-
         return new ResponseEntity<>(countryRes, HttpStatus.CREATED);
     }
 
@@ -75,8 +78,13 @@ public class CountriesService {
                 countryDto.getLon() == null || countryDto.getId() == null){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
+        // double check the ids
         if (!id.equals(countryDto.getId())){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        // check if the latitude and longitude are valid
+        if (countryDto.getLat() < -90 || countryDto.getLat() > 90 || countryDto.getLon() < -180 || countryDto.getLon() > 180){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -84,7 +92,7 @@ public class CountriesService {
         if (taraOptional.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        // check if the country with the given name exists
+        // check if the country already exists
         if (taraRepository.existsByNumeTara(countryDto.getNume())){
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
@@ -93,17 +101,21 @@ public class CountriesService {
         tara.setNumeTara(countryDto.getNume());
         tara.setLatitudine(countryDto.getLat());
         tara.setLongitudine(countryDto.getLon());
-        taraRepository.save(tara);
+        try {
+            taraRepository.save(tara);
+        }
+        catch (DataIntegrityViolationException e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public ResponseEntity<?> deleteCountry(Integer id) {
-        //check if id is null
         if(id == null){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        // check if it exists
+
         if(!taraRepository.existsById(id)){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

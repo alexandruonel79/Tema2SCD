@@ -40,7 +40,7 @@ public class CitiesController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateCity(@PathVariable Integer id,@RequestBody CityRes cityDto){
+    public ResponseEntity<?> updateCity(@PathVariable Integer id, @RequestBody CityRes cityDto){
         return citiesService.updateCity(id, cityDto);
     }
 
@@ -48,6 +48,4 @@ public class CitiesController {
     public ResponseEntity<?> deleteCity(@PathVariable Integer id){
         return citiesService.deleteCity(id);
     }
-
-
 }

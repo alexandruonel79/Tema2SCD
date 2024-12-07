@@ -8,7 +8,6 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
 
-// • [Temperaturi] : id, valoare, timestamp, id_oras (unic(id_oras, timestamp)).
 @Entity
 @Table(name = "`Temperaturi`", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"id_oras", "timestamp"})

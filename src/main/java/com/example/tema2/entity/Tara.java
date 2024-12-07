@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-//    • [Tari] : id, nume_tara, latitudine, longitudine (unic(nume_tara));
 @Entity
 @Table(name = "`Tari`", uniqueConstraints = {
         @UniqueConstraint(columnNames = "nume_tara")

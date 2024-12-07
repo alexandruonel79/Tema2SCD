@@ -9,5 +9,4 @@ import java.util.Optional;
 @Repository
 public interface TaraRepository extends JpaRepository<Tara, Integer> {
     boolean existsByNumeTara(String numeTara);
-    boolean existsByLongitudineAndLatitudine(Double longitudine, Double latitudine);
 }

@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-// • [Orase] : id, id_tara, nume_oras, latitudine, longitudine (unic(id_tara, nume_oras));
 @Entity
 @Table(name = "`Orase`", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"id_tara", "nume_oras"})

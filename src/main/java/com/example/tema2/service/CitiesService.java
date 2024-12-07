@@ -8,6 +8,7 @@ import com.example.tema2.entity.Tara;
 import com.example.tema2.repository.OrasRepository;
 import com.example.tema2.repository.TaraRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -29,28 +30,30 @@ public class CitiesService {
 
 
     public ResponseEntity<?> addCity(CityDto cityDto) {
+        // check if any field is null, and send a bad request
         if (cityDto.getIdTara() == null || cityDto.getNume() == null || cityDto.getLat() == null ||
                 cityDto.getLon() == null){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        // check if the country with the given id exists
+        // check if the latitude and longitude are valid
+        if (cityDto.getLat() < -90 || cityDto.getLat() > 90 || cityDto.getLon() < -180 || cityDto.getLon() > 180){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         if (!taraRepository.existsById(cityDto.getIdTara())){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         Optional<Tara> orasList = taraRepository.findById(cityDto.getIdTara());
-        if (!orasList.isEmpty() &&
-                orasList.get().getOrase().stream().anyMatch(oras -> oras.getNumeOras().equals(cityDto.getNume()))){
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        // if there already exists a city with the same name, send conflict error
+        if (orasList.isPresent()){
+            List<Oras> orasList1 = orasList.get().getOrase();
+            for (Oras oras: orasList1){
+                if (oras.getNumeOras().equals(cityDto.getNume())){
+                    return new ResponseEntity<>(HttpStatus.CONFLICT);
+                }
+            }
         }
-
-//        if (orasRepository.existsByNumeOras(cityDto.getNume())){
-//            return new ResponseEntity<>(HttpStatus.CONFLICT);
-//        }
-
-//        if (orasRepository.existsByLongitudineAndLatitudine(cityDto.getLon(), cityDto.getLat())){
-//            return new ResponseEntity<>(HttpStatus.CONFLICT);
-//        }
 
         Oras oras = new Oras();
         oras.setNumeOras(cityDto.getNume());
@@ -58,10 +61,15 @@ public class CitiesService {
         oras.setLongitudine(cityDto.getLon());
         oras.setTara(taraRepository.findById(cityDto.getIdTara()).get());
 
-        oras = orasRepository.save(oras);
+        try{
+            oras = orasRepository.save(oras);
+        }
+        catch (DataIntegrityViolationException e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+        // return the id
         IdRes idRes = new IdRes();
         idRes.setId(oras.getId());
-
         return new ResponseEntity<>(idRes, HttpStatus.CREATED);
     }
 
@@ -83,18 +91,20 @@ public class CitiesService {
     }
 
     public ResponseEntity<?> getCitiesByCountry(Integer countryId) {
+        // if the country id is not specified, return an empty list
+        // should be 404
         if (countryId == null){
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
         }
         Optional<Tara> taraOptional = taraRepository.findById(countryId);
-
+        // if its mentioned but no country exists with that id, return an empty list
         if (taraOptional.isEmpty()){
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
         }
 
         List<Oras> orasList = taraOptional.get().getOrase();
-        List<CityRes> cityResList = new ArrayList<>();
 
+        List<CityRes> cityResList = new ArrayList<>();
         for (Oras oras: orasList){
             CityRes cityRes = new CityRes();
             cityRes.setId(oras.getId());
@@ -114,8 +124,13 @@ public class CitiesService {
                 cityDto.getLon() == null || cityDto.getIdTara() == null){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
+        // double check the param variable and the body variable
         if (!cityDto.getId().equals(id)){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        // check if the latitude and longitude are valid
+        if (cityDto.getLat() < -90 || cityDto.getLat() > 90 || cityDto.getLon() < -180 || cityDto.getLon() > 180){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -147,17 +162,21 @@ public class CitiesService {
         oras.setNumeOras(cityDto.getNume());
         oras.setLatitudine(cityDto.getLat());
         oras.setLongitudine(cityDto.getLon());
-        orasRepository.save(oras);
+        try{
+            orasRepository.save(oras);
+        }
+        catch (DataIntegrityViolationException e){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public ResponseEntity<?> deleteCity(Integer id) {
-        // check if id is null
         if (id == null){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        // check the city exists
+
         if (!orasRepository.existsById(id)){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

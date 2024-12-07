@@ -1,34 +1,37 @@
 #https://www.youtube.com/watch?v=6GoEfLsTI1E&ab_channel=Geekific util
-#adaugarea de restart:always?
 services:
   spring:
     container_name: spring
-    networks:
-      - spring_network
-      - common_network
     build:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      - db
+      - db_postgres
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/tema2
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db_postgres:5432/tema2
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
+    networks:
+      - spring_network
+      - common_network
     restart: always
+    # lasat expus pentru a putea rula Postman collection-ul
     ports:
       - "6000:6000"
-  db:
+
+  db_postgres:
+    container_name: db_postgres
     image: postgres:latest
     environment:
       - POSTGRES_DB=tema2
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     networks:
-        - db_network
+        - db_postgres_network
         - common_network
     volumes:
         - db_data:/var/lib/postgresql/data
+    restart: always
 
   pgadmin:
     container_name: pgadmin
@@ -39,16 +42,19 @@ services:
     networks:
       - pgadmin_network
       - common_network
+    # lasat expus pentru a vedea datele salvate in bd
     ports:
         - "8081:80"
 #https://forums.docker.com/t/automatically-connect-pgadmin-to-a-postgresql-volume-on-which-there-is-a-database-and-automatically-load-a-schema-present-on-a-sql-file-with-docker-compose/124647/2
     volumes:
       - ./servers.json:/pgadmin4/servers.json
-
+#https://forums.docker.com/t/communication-between-containers-in-different-networks/7509
+#https://stackoverflow.com/questions/36035595/communicating-between-docker-containers-in-different-networks-on-the-same-host
+#https://docs.docker.com/engine/network/
 networks:
     spring_network:
         driver: bridge
-    db_network:
+    db_postgres_network:
         driver: bridge
     pgadmin_network:
         driver: bridge

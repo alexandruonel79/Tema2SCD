@@ -6,7 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface OrasRepository extends JpaRepository<Oras, Integer> {
-    boolean existsByNumeOras(String numeOras);
-
-    boolean existsByLongitudineAndLatitudine(Double longitudine, Double latitudine);
 }
