@@ -1,4 +1,5 @@
 Onel Alexandru Gabriel 342C5
+
 Am implementat toate cerintele.
 
     Arhitectura: Java Spring Boot pentru backend, PostgreSQL pentru baza de date, pgaAdmin ca utilitar pentru administrarea
@@ -55,7 +56,12 @@ Pentru a comunica intre ele, am adaugat o retea comuna intre ele astfel:
             intre spring si baza de date -> spring_db_network_shared
             intre baza de date si utilitarul pgAdmin -> db_postgres_pgadmin_network_shared
 Pentru driver, am mers pe bridge la toate pentru izolare, expunerea de porturi si comunicarea intre retele.
-Am testat si ping ul folosind numele serviciului si a functionat.
+Am testat si ping ul folosind numele serviciului si a functionat. Masinile, din economie, nu au nici utilitarul de ping
+instalat, trebuie instalat.
 
 Urmatorul pas a fost adaugarea de volume pentru persistenta. Am adaugat pentru baza de date si pentru utilitarul de
 administrare (salveaza server ul adaugat, cu tot cu credentials).
+
+Feedback:
+           A fost o tema utila, din care am invatat docker. Nu a fost dificila, in cateva zile se putea face fara
+probleme.
