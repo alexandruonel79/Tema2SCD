@@ -1,0 +1,61 @@
+Onel Alexandru Gabriel 342C5
+Am implementat toate cerintele.
+
+    Arhitectura: Java Spring Boot pentru backend, PostgreSQL pentru baza de date, pgaAdmin ca utilitar pentru administrarea
+bazei de date.
+
+    Primul pas a fost configurarea bazei de date. In spring, se face foarte usor. In application.properties se
+adauga urmatoarele linii pentru postgres:
+                                          spring.datasource.url=jdbc:postgresql://localhost:5432/tema2
+                                          spring.datasource.username=username-ul bazei de date
+                                          spring.datasource.password=parola bazei de date
+                                          spring.datasource.driver-class-name=org.postgresql.Driver
+                                          spring.jpa.hibernate.ddl-auto=update, aici se specifica daca o sa fie persistenta
+
+    Am inceput tema prin realizarea serverului de backend. Am implementat pe rand fiecare API, in ordinea data in enunt.
+    Structura serverului de spring este impartita astfel:
+                                                      controller
+                                                      dto
+                                                      service
+                                                      repository
+                                                      entity
+
+    In entity, am definit tabelele din baza de date, si in acelasi timp, clasele mele utilizate. Am respectat denumirile
+tabelelor, am folosit si o dependinta in plus pentru a putea salva in baza de date tabelul incepand cu litera mare, cat
+si constrangerile de integritate.
+    In controller, am definit rutele acceptate, iar spring mi-a oferit o modularitate foarte buna. Am avut doar 3 fisiere,
+fiecare cu rutele pentru cities, temperatures si countries. In controllere, doar am apelat serviciul. De exemplu, pentru
+ruta de add country, in controller, doar apelez functia addCountry din serviciu. Acesta imi returneaza rezultatul sub
+forma unui ResponseEntity<>. Acestui tip de obiect ii poate fi atasat un cod HTTP, si o valoare/array. Practic controller-ul
+a ramas doar definirea interfetei.
+    In service, am implementat business logic-ul. Am realizat operatii de CREATE, INSERT, UPDATE, DELETE (CRUD) folosind
+repository ul. Functiile mai dificile de implementat au fost cele cu parametrii variabili (putand fi absenti). Acolo, am
+decis sa tratez pe rand, toate cazurile. Spre exemplu, pentru functia cea mai complexa, cu lat, lon, from si until, am
+gandit sa tratez mai intai toate cazurile pentru lat si lon, creeand un nou arraylist cu acele obiecte ce au respectat
+conditiile lat si lon. Dupa am creat un arraylist final, in care am verificat sa respecte from si until, acesta fiind
+cel final. Nu este cel mai eficient, sigur exista si mai frumos implementat. Service ul se foloste de repository,
+interfata de relationare cu baza de date.
+    Am utilizat dto (data transfer object), in controllere si in service pentru calitatea codului.
+    Printre dependintele utilizate, am folosit Lombok, care reduce necesitatea crearii de constructori, getters si
+setters.
+
+    Dupa ce am finalizat backendul, am trecut la implementarea docker-compose. Primul pas a fost sa creez fisierul
+docker-compose, in care am adaugat baza de date. Dupa am trecut la crearea Dockerfile ului pentru backend. Aici am gasit
+mai multe variante:
+                    1) creare JAR local si copiere pe docker -> foarte usor, dura putin build ul
+                    2) creare JAR direct pe docker -> build care dureaza mai mult
+Am ales sa construiesc JAR ul pe docker, de aici un build de aprox 80 de secunde. Am gasit un exemplu de Dockerfile
+pentru spring boot, am lasat link ul in Dockerfile. Am adaugat doar un chmod +x deoarece, testand pe masina virtuala,
+nu putea rula fara drepturi, desi pe windows docker a mers. Ulterior am adaugat si utilitarul pgAdmin. Am adaugat restart:
+always, ca in cazul in care apare o eroare, docker va reincerca sa porneasca acel serviciu. Urmatorul pas a fost sa fac
+corect retelele. Am facut research, am lasat mai multe link uri in docker compose, si am ajuns la aceasta configuratie:
+
+Fiecare serviciu are propriul network.
+Pentru a comunica intre ele, am adaugat o retea comuna intre ele astfel:
+            intre spring si baza de date -> spring_db_network_shared
+            intre baza de date si utilitarul pgAdmin -> db_postgres_pgadmin_network_shared
+Pentru driver, am mers pe bridge la toate pentru izolare, expunerea de porturi si comunicarea intre retele.
+Am testat si ping ul folosind numele serviciului si a functionat.
+
+Urmatorul pas a fost adaugarea de volume pentru persistenta. Am adaugat pentru baza de date si pentru utilitarul de
+administrare (salveaza server ul adaugat, cu tot cu credentials).

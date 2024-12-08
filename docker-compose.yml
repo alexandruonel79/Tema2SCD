@@ -13,7 +13,7 @@ services:
       - SPRING_DATASOURCE_PASSWORD=postgres
     networks:
       - spring_network
-      - common_network
+      - spring_db_network_shared
     restart: always
     # lasat expus pentru a putea rula Postman collection-ul
     ports:
@@ -28,7 +28,8 @@ services:
       - POSTGRES_PASSWORD=postgres
     networks:
         - db_postgres_network
-        - common_network
+        - spring_db_network_shared
+        - db_postgres_pgadmin_network_shared
     volumes:
         - db_data:/var/lib/postgresql/data
     restart: always
@@ -41,7 +42,7 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=onel
     networks:
       - pgadmin_network
-      - common_network
+      - db_postgres_pgadmin_network_shared
     # lasat expus pentru a vedea datele salvate in bd
     ports:
         - "8081:80"
@@ -58,7 +59,9 @@ networks:
         driver: bridge
     pgadmin_network:
         driver: bridge
-    common_network:
+    spring_db_network_shared:
+        driver: bridge
+    db_postgres_pgadmin_network_shared:
         driver: bridge
 
 volumes:
