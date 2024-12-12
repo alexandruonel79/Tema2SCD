@@ -237,7 +237,7 @@ public class TemperaturesService {
 
     public ResponseEntity<?> updateTemperature(Integer id, TemperatureDtoUpdate temperatureDtoUpdate) {
         // check if anything is null
-        if (temperatureDtoUpdate.getId_oras() == null || temperatureDtoUpdate.getValoare() == null){
+        if (temperatureDtoUpdate.getIdOras() == null || temperatureDtoUpdate.getValoare() == null){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         // double check the ids
@@ -245,7 +245,7 @@ public class TemperaturesService {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         Optional<Temperatura> temperaturaOptional = temperaturaRepository.findById(id);
-        Optional<Oras> orasOptional = orasRepository.findById(temperatureDtoUpdate.getId_oras());
+        Optional<Oras> orasOptional = orasRepository.findById(temperatureDtoUpdate.getIdOras());
         // if the temperature or the city mentioned does not exist, return 404
         if (temperaturaOptional.isEmpty() || orasOptional.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

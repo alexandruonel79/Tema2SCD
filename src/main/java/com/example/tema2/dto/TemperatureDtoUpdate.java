@@ -10,6 +10,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class TemperatureDtoUpdate {
     private Integer id;
-    private Integer id_oras;
+    private Integer idOras;
     private Double valoare;
 }
