@@ -39,15 +39,15 @@ public class TemperaturesService {
 
     public ResponseEntity<?> addTemperature(TemperatureDto temperatureDto) {
         // check if anything is null
-        if (temperatureDto.getId_oras() == null || temperatureDto.getValoare() == null){
+        if (temperatureDto.getIdOras() == null || temperatureDto.getValoare() == null){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         // not found error
-        if (!orasRepository.existsById(temperatureDto.getId_oras())){
+        if (!orasRepository.existsById(temperatureDto.getIdOras())){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         // get the city with the given id
-        Oras oras = orasRepository.findById(temperatureDto.getId_oras()).get();
+        Oras oras = orasRepository.findById(temperatureDto.getIdOras()).get();
 
         Temperatura temperatura = new Temperatura();
         temperatura.setValoare(temperatureDto.getValoare());
