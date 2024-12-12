@@ -8,24 +8,24 @@ services:
     depends_on:
       - db_postgres
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db_postgres:5432/tema2
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL}
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
     networks:
       - spring_network
       - spring_db_network_shared
     restart: always
     # lasat expus pentru a putea rula Postman collection-ul
     ports:
-      - "6000:6000"
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
 
   db_postgres:
     container_name: db_postgres
     image: postgres:latest
     environment:
-      - POSTGRES_DB=tema2
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     networks:
         - db_postgres_network
         - spring_db_network_shared
@@ -38,14 +38,14 @@ services:
     container_name: pgadmin
     image: dpage/pgadmin4
     environment:
-      - PGADMIN_DEFAULT_EMAIL=onel@gmail.com
-      - PGADMIN_DEFAULT_PASSWORD=onel
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
     networks:
       - pgadmin_network
       - db_postgres_pgadmin_network_shared
     # lasat expus pentru a vedea datele salvate in bd
     ports:
-        - "8081:80"
+        - "${PGADMIN_EXPOSED_PORT}:${PGADMIN_PORT}"
 #https://forums.docker.com/t/automatically-connect-pgadmin-to-a-postgresql-volume-on-which-there-is-a-database-and-automatically-load-a-schema-present-on-a-sql-file-with-docker-compose/124647/2
     volumes:
       - ./servers.json:/pgadmin4/servers.json
